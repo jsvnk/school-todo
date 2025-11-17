@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dodaj nalogo</h2>
+
+<form method="post">
+    <p>
+        <label>Naslov naloge:<br>
+            <input type="text" name="title" required>
+        </label>
+    </p>
+    <p>
+        <label>Predmet:<br>
+            <input type="text" name="subject" placeholder="Matematika, Fizika ..." required>
+        </label>
+    </p>
+    <p>
+        <label>Tip:<br>
+            <input type="text" name="task_type" placeholder="naloga, kolokvij, kviz ..." required>
+        </label>
+    </p>
+    <p>
+        <label>Rok:<br>
+            <input type="date" name="due_date" required>
+        </label>
+    </p>
+    <p>
+        <label>Opis / link (npr. na ucilnice.arnes.si):<br>
+            <textarea name="description" rows="4"></textarea>
+        </label>
+    </p>
+    <p>
+        <button type="submit">Shrani</button>
+    </p>
+</form>
+{% endblock %}

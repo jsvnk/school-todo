@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sl">
+<head>
+    <meta charset="utf-8">
+    <title>Šolske naloge</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 1rem; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        a { text-decoration: none; color: #0066cc; }
+        .task { border: 1px solid #ddd; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; }
+        .task.overdue { border-color: #ff4d4d; background: #ffe5e5; }
+        .task.soon { border-color: #ff9900; background: #fff3e0; }
+        .task.done { opacity: 0.6; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; background: #eee; margin-left: 0.5rem; }
+        .badge.type { background: #d0e7ff; }
+        .badge.subject { background: #e5ffd0; }
+        .date { font-weight: bold; }
+        nav a { margin-right: 1rem; }
+    </style>
+</head>
+<body>
+<header>
+    <div><strong>Šolske naloge</strong></div>
+    <nav>
+        <a href="{{ url_for('index') }}">Vse naloge</a>
+        <a href="{{ url_for('add_task') }}">Dodaj nalogo</a>
+    </nav>
+</header>
+
+<hr>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>

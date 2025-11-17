@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Seznam nalog</h2>
+
+<p>
+    {% if show_done %}
+        <a href="{{ url_for('index', show_done=0) }}">Skrij dokončane</a>
+    {% else %}
+        <a href="{{ url_for('index', show_done=1) }}">Pokaži tudi dokončane</a>
+    {% endif %}
+</p>
+
+{% if not tasks %}
+    <p>Trenutno ni nalog.</p>
+{% else %}
+    {% for task in tasks %}
+        {% set classes = ["task"] %}
+        {% if task.is_done %}
+            {% set _ = classes.append("done") %}
+        {% elif task.is_overdue() %}
+            {% set _ = classes.append("overdue") %}
+        {% elif task.is_soon() %}
+            {% set _ = classes.append("soon") %}
+        {% endif %}
+
+        <div class="{{ ' '.join(classes) }}">
+            <div class="task-header">
+                <div>
+                    <span class="date">{{ task.due_date.strftime("%d.%m.%Y") }}</span>
+                    <strong>{{ task.title }}</strong>
+                    <span class="badge subject">{{ task.subject }}</span>
+                    <span class="badge type">{{ task.task_type }}</span>
+                </div>
+                <div>
+                    {% if task.is_done %}
+                        <a href="{{ url_for('mark_undone', task_id=task.id) }}">Označi kot nedokončano</a>
+                    {% else %}
+                        <a href="{{ url_for('mark_done', task_id=task.id) }}">Označi kot opravljeno</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% if task.description %}
+                <p>{{ task.description }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
