@@ -2,6 +2,17 @@
 {% block content %}
 <h2>Seznam nalog</h2>
 
+<div class="overview">
+    <h3>Obveznosti</h3>
+    <ul>
+        <li>Zamujeno: {{ overview.overdue|length }}</li>
+        <li>Danes: {{ overview.today|length }}</li>
+        <li>V 1 tednu: {{ overview.week|length }}</li>
+        <li>V 2 tednih: {{ overview.two_weeks|length }}</li>
+        <li>Kasneje: {{ overview.later|length }}</li>
+    </ul>
+</div>
+
 <form method="get" style="margin-bottom: 1rem;">
     <label>
         Predmet:
@@ -38,6 +49,11 @@
                     <strong>{{ task.title }}</strong>
                     <span class="badge subject">{{ task.subject }}</span>
                     <span class="badge type">{{ task.task_type }}</span>
+                    {% if task.priority == 'obvezno' %}
+                        <span class="badge priority-obvezno">Obvezno</span>
+                    {% else %}
+                        <span class="badge priority-neobvezno">Neobvezno</span>
+                    {% endif %}
                 </div>
                 <div>
                     {% if task.is_done %}

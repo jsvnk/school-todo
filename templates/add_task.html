@@ -26,6 +26,14 @@
         </label>
     </p>
     <p>
+        <label>Prioriteta:<br>
+            <select name="priority" required>
+                <option value="obvezno" {% if not task or task.priority == 'obvezno' %}selected{% endif %}>Obvezno</option>
+                <option value="neobvezno" {% if task and task.priority == 'neobvezno' %}selected{% endif %}>Neobvezno</option>
+            </select>
+        </label>
+    </p>
+    <p>
         <label>Rok:<br>
             <input type="date" name="due_date" value="{{ task.due_date.strftime('%Y-%m-%d') if task else '' }}" required>
         </label>

@@ -1,8 +1,9 @@
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 # -------------------------------------------------
 # KONFIGURACIJA
@@ -40,6 +41,8 @@ TASK_TYPES = [
     "Test iz vaj",
 ]
 
+PRIORITY_LEVELS = ["obvezno", "neobvezno"]
+
 
 # -------------------------------------------------
 # MODEL: naloga
@@ -52,6 +55,7 @@ class Task(db.Model):
     due_date = db.Column(db.Date, nullable=False)            # rok (datum)
     description = db.Column(db.Text)                         # opis, link na ucilnice
     is_done = db.Column(db.Boolean, default=False)           # ali je opravljena
+    priority = db.Column(db.String(20), nullable=False, default="obvezno")  # obvezno / neobvezno
 
     def is_overdue(self):
         return (not self.is_done) and self.due_date < datetime.today().date()
@@ -68,6 +72,18 @@ class Task(db.Model):
 # -------------------------------------------------
 with app.app_context():
     db.create_all()
+
+    # Poskrbimo, da stolpec priority obstaja (za SQLite in Postgres).
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(
+                text(
+                    "ALTER TABLE task ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'obvezno'"
+                )
+            )
+    except Exception:
+        # Če stolpec že obstaja ali ALTER ni potreben, napako ignoriramo.
+        pass
 
 
 # -------------------------------------------------
@@ -105,21 +121,57 @@ def index():
     subject_filter = request.args.get("subject", "")
 
     # seznam vseh predmetov za filter (distinct)
-    subjects = [s[0] for s in db.session.query(Task.subject).distinct().order_by(Task.subject).all()]
+    subjects = [
+        s[0]
+        for s in db.session.query(Task.subject)
+        .distinct()
+        .order_by(Task.subject)
+        .all()
+    ]
 
-    query = Task.query.order_by(Task.due_date.asc())
+    base_query = Task.query.order_by(Task.due_date.asc())
     if subject_filter:
-        query = query.filter(Task.subject == subject_filter)
+        base_query = base_query.filter(Task.subject == subject_filter)
+
+    # za glavni seznam upoštevamo tudi show_done
+    query = base_query
     if not show_done:
         query = query.filter(Task.is_done.is_(False))
 
     tasks = query.all()
+
+    # pregled obveznosti (samo nedokončane naloge)
+    today = date.today()
+    todo_tasks = base_query.filter(Task.is_done.is_(False)).all()
+
+    overview = {
+        "overdue": [],
+        "today": [],
+        "week": [],
+        "two_weeks": [],
+        "later": [],
+    }
+
+    for t in todo_tasks:
+        delta = (t.due_date - today).days
+        if delta < 0:
+            overview["overdue"].append(t)
+        elif delta == 0:
+            overview["today"].append(t)
+        elif delta <= 7:
+            overview["week"].append(t)
+        elif delta <= 14:
+            overview["two_weeks"].append(t)
+        else:
+            overview["later"].append(t)
+
     return render_template(
         "index.html",
         tasks=tasks,
         show_done=show_done,
         subjects=subjects,
         subject_filter=subject_filter,
+        overview=overview,
     )
 
 
@@ -131,6 +183,7 @@ def add_task():
         subject = request.form["subject"].strip()
         due_date_str = request.form["due_date"]
         description = request.form.get("description", "").strip()
+        priority = request.form.get("priority", "obvezno").strip() or "obvezno"
 
         # HTML <input type="date"> vrne "YYYY-MM-DD"
         due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
@@ -141,6 +194,7 @@ def add_task():
             subject=subject,
             due_date=due_date,
             description=description,
+            priority=priority,
         )
         db.session.add(task)
         db.session.commit()
@@ -159,6 +213,7 @@ def edit_task(task_id):
         task.subject = request.form["subject"].strip()
         due_date_str = request.form["due_date"]
         task.description = request.form.get("description", "").strip()
+        task.priority = request.form.get("priority", "obvezno").strip() or "obvezno"
 
         task.due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
 
