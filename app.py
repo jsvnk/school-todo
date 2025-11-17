@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
@@ -119,6 +119,7 @@ def check_login():
 def index():
     show_done = request.args.get("show_done", "0") == "1"
     subject_filter = request.args.get("subject", "")
+    range_filter = request.args.get("range", "")  # "", "overdue", "today", "week", "two_weeks", "later"
 
     # seznam vseh predmetov za filter (distinct)
     subjects = [
@@ -129,20 +130,15 @@ def index():
         .all()
     ]
 
-    base_query = Task.query.order_by(Task.due_date.asc())
+    base_query = Task.query
     if subject_filter:
         base_query = base_query.filter(Task.subject == subject_filter)
 
-    # za glavni seznam upoštevamo tudi show_done
-    query = base_query
-    if not show_done:
-        query = query.filter(Task.is_done.is_(False))
-
-    tasks = query.all()
+    today = date.today()
 
     # pregled obveznosti (samo nedokončane naloge)
-    today = date.today()
-    todo_tasks = base_query.filter(Task.is_done.is_(False)).all()
+    overview_query = base_query.filter(Task.is_done.is_(False))
+    overview_tasks = overview_query.all()
 
     overview = {
         "overdue": [],
@@ -152,7 +148,7 @@ def index():
         "later": [],
     }
 
-    for t in todo_tasks:
+    for t in overview_tasks:
         delta = (t.due_date - today).days
         if delta < 0:
             overview["overdue"].append(t)
@@ -165,6 +161,36 @@ def index():
         else:
             overview["later"].append(t)
 
+    # glavni seznam nalog
+    query = base_query
+
+    if range_filter:
+        # ko filtriramo po obveznostih, prikažemo samo nedokončane naloge
+        query = query.filter(Task.is_done.is_(False))
+
+        if range_filter == "overdue":
+            query = query.filter(Task.due_date < today)
+        elif range_filter == "today":
+            query = query.filter(Task.due_date == today)
+        elif range_filter == "week":
+            query = query.filter(
+                Task.due_date >= today,
+                Task.due_date <= today + timedelta(days=7),
+            )
+        elif range_filter == "two_weeks":
+            query = query.filter(
+                Task.due_date >= today,
+                Task.due_date <= today + timedelta(days=14),
+            )
+        elif range_filter == "later":
+            query = query.filter(Task.due_date > today + timedelta(days=14))
+    else:
+        # brez range filtra uporabimo običajno logiko show_done
+        if not show_done:
+            query = query.filter(Task.is_done.is_(False))
+
+    tasks = query.order_by(Task.due_date.asc()).all()
+
     return render_template(
         "index.html",
         tasks=tasks,
@@ -172,6 +198,7 @@ def index():
         subjects=subjects,
         subject_filter=subject_filter,
         overview=overview,
+        range_filter=range_filter,
     )
 
 

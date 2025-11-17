@@ -2,47 +2,51 @@
 <html lang="sl">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Šolske naloge</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 1rem; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        a { text-decoration: none; color: #0066cc; }
-        .task { border: 1px solid #ddd; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; }
-        .task.overdue { border-color: #ff4d4d; background: #ffe5e5; }
-        .task.soon { border-color: #ff9900; background: #fff3e0; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        header { margin-bottom: 1rem; }
+        .task { border: 1px solid #ddd; padding: 0.75rem; margin-bottom: 0.75rem; border-radius: 0.5rem; }
+        .task.overdue { border-color: #dc3545; background: #ffe5e5; }
+        .task.soon { border-color: #fd7e14; background: #fff3e0; }
         .task.done { opacity: 0.6; }
-        .task-header { display: flex; justify-content: space-between; align-items: center; }
-        .badge { padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; background: #eee; margin-left: 0.5rem; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; margin-left: 0.25rem; }
         .badge.type { background: #d0e7ff; }
         .badge.subject { background: #e5ffd0; }
         .badge.priority-obvezno { background: #ffd0d0; }
         .badge.priority-neobvezno { background: #d0ffe0; }
-        .date { font-weight: bold; }
-        nav a { margin-right: 1rem; }
-        .right { text-align: right; }
+        .date { font-weight: 600; margin-right: 0.5rem; }
         .error { color: #c00; }
-        .overview { border: 1px solid #ccc; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; background: #f9f9f9; }
-        .overview h3 { margin-top: 0; }
+        .overview { border: 1px solid #ccc; padding: 0.75rem; margin-bottom: 1rem; border-radius: 0.5rem; background: #f9f9f9; }
+        .overview h3 { margin-top: 0; font-size: 1.1rem; }
     </style>
 </head>
-<body>
-<header>
-    <div><strong>Šolske naloge</strong></div>
-    <nav>
-        {% if session.get('logged_in') %}
-            <a href="{{ url_for('index') }}">Naloge</a>
-            <a href="{{ url_for('add_task') }}">Dodaj nalogo</a>
-            <span>| Prijavljen kot {{ session.get('username') }}</span>
-            <a href="{{ url_for('logout') }}">Odjava</a>
-        {% else %}
-            <a href="{{ url_for('login') }}">Prijava</a>
-        {% endif %}
-    </nav>
-</header>
+<body class="bg-light">
+<div class="container py-3">
+    <header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="h4 mb-0">Šolske naloge</div>
+        <nav class="d-flex align-items-center gap-3">
+            {% if session.get('logged_in') %}
+                <a href="{{ url_for('index') }}" class="link-primary text-decoration-none">Naloge</a>
+                <a href="{{ url_for('add_task') }}" class="btn btn-sm btn-primary">Dodaj nalogo</a>
+                <span class="text-muted small">Prijavljen kot {{ session.get('username') }}</span>
+                <a href="{{ url_for('logout') }}" class="link-secondary text-decoration-none">Odjava</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary">Prijava</a>
+            {% endif %}
+        </nav>
+    </header>
 
-<hr>
+    <hr>
 
-{% block content %}{% endblock %}
+    {% block content %}{% endblock %}
+</div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

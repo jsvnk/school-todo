@@ -1,39 +1,59 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Seznam nalog</h2>
+<h2 class="h4 mb-3">Seznam nalog</h2>
 
-<div class="overview">
-    <h3>Obveznosti</h3>
-    <ul>
-        <li>Zamujeno: {{ overview.overdue|length }}</li>
-        <li>Danes: {{ overview.today|length }}</li>
-        <li>V 1 tednu: {{ overview.week|length }}</li>
-        <li>V 2 tednih: {{ overview.two_weeks|length }}</li>
-        <li>Kasneje: {{ overview.later|length }}</li>
-    </ul>
+<div class="row g-3 mb-3 align-items-end">
+    <div class="col-12 col-md-4">
+        <div class="overview">
+            <h3>Obveznosti (nedokončane)</h3>
+            <ul class="mb-0 small">
+                <li>Zamujeno: {{ overview.overdue|length }}</li>
+                <li>Danes: {{ overview.today|length }}</li>
+                <li>V 1 tednu: {{ overview.week|length }}</li>
+                <li>V 2 tednih: {{ overview.two_weeks|length }}</li>
+                <li>Kasneje: {{ overview.later|length }}</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-12 col-md-8">
+        <form method="get" class="row gy-2 gx-2">
+            <div class="col-12 col-sm-4">
+                <label class="form-label mb-1 small">Predmet</label>
+                <select name="subject" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Vsi predmeti</option>
+                    {% for subj in subjects %}
+                        <option value="{{ subj }}" {% if subj == subject_filter %}selected{% endif %}>{{ subj }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-sm-4">
+                <label class="form-label mb-1 small">Obveznosti</label>
+                <select name="range" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="" {% if not range_filter %}selected{% endif %}>Vse</option>
+                    <option value="overdue" {% if range_filter == 'overdue' %}selected{% endif %}>Zamujeno ({{ overview.overdue|length }})</option>
+                    <option value="today" {% if range_filter == 'today' %}selected{% endif %}>Danes ({{ overview.today|length }})</option>
+                    <option value="week" {% if range_filter == 'week' %}selected{% endif %}>V 1 tednu ({{ overview.week|length }})</option>
+                    <option value="two_weeks" {% if range_filter == 'two_weeks' %}selected{% endif %}>V 2 tednih ({{ overview.two_weeks|length }})</option>
+                    <option value="later" {% if range_filter == 'later' %}selected{% endif %}>Kasneje ({{ overview.later|length }})</option>
+                </select>
+            </div>
+            <div class="col-12 col-sm-4 d-flex align-items-center">
+                <div class="form-check mt-3 mt-sm-0">
+                    <input class="form-check-input" type="checkbox" name="show_done" value="1" id="showDoneCheck" {% if show_done and not range_filter %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="form-check-label small" for="showDoneCheck">
+                        Pokaži dokončane (brez filtra obveznosti)
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-
-<form method="get" style="margin-bottom: 1rem;">
-    <label>
-        Predmet:
-        <select name="subject" onchange="this.form.submit()">
-            <option value="">Vsi predmeti</option>
-            {% for subj in subjects %}
-                <option value="{{ subj }}" {% if subj == subject_filter %}selected{% endif %}>{{ subj }}</option>
-            {% endfor %}
-        </select>
-    </label>
-    <label style="margin-left: 1rem;">
-        <input type="checkbox" name="show_done" value="1" {% if show_done %}checked{% endif %} onchange="this.form.submit()">
-        Pokaži dokončane
-    </label>
-</form>
 
 {% if not tasks %}
     <p>Trenutno ni nalog.</p>
 {% else %}
     {% for task in tasks %}
-        {% set classes = ["task"] %}
+        {% set classes = ["task", "bg-white", "shadow-sm"] %}
         {% if task.is_done %}
             {% set _ = classes.append("done") %}
         {% elif task.is_overdue() %}
@@ -55,21 +75,21 @@
                         <span class="badge priority-neobvezno">Neobvezno</span>
                     {% endif %}
                 </div>
-                <div>
+                <div class="small d-flex flex-wrap gap-2">
                     {% if task.is_done %}
-                        <a href="{{ url_for('mark_undone', task_id=task.id) }}">Označi kot nedokončano</a>
+                        <a href="{{ url_for('mark_undone', task_id=task.id) }}" class="link-secondary text-decoration-none">Označi kot nedokončano</a>
                     {% else %}
-                        <a href="{{ url_for('mark_done', task_id=task.id) }}">Označi kot opravljeno</a>
+                        <a href="{{ url_for('mark_done', task_id=task.id) }}" class="link-success text-decoration-none">Označi kot opravljeno</a>
                     {% endif %}
-                    |
-                    <a href="{{ url_for('edit_task', task_id=task.id) }}">Uredi</a>
-                    <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" style="display:inline;" onsubmit="return confirm('Res želiš izbrisati to nalogo?');">
-                        <button type="submit" style="background:none;border:none;color:#c00;cursor:pointer;padding:0;">Izbriši</button>
+                    <span class="text-muted">|</span>
+                    <a href="{{ url_for('edit_task', task_id=task.id) }}" class="link-primary text-decoration-none">Uredi</a>
+                    <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" class="d-inline" onsubmit="return confirm('Res želiš izbrisati to nalogo?');">
+                        <button type="submit" class="btn btn-link btn-sm text-danger p-0">Izbriši</button>
                     </form>
                 </div>
             </div>
             {% if task.description %}
-                <p>{{ task.description }}</p>
+                <p class="mt-2 mb-0 small">{{ task.description }}</p>
             {% endif %}
         </div>
     {% endfor %}

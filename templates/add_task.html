@@ -1,53 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{% if task %}Uredi nalogo{% else %}Dodaj nalogo{% endif %}</h2>
+<h2 class="h4 mb-3">{% if task %}Uredi nalogo{% else %}Dodaj nalogo{% endif %}</h2>
 
-<form method="post">
-    <p>
-        <label>Naslov naloge:<br>
-            <input type="text" name="title" value="{{ task.title if task else '' }}" required>
-        </label>
-    </p>
-    <p>
-        <label>Predmet:<br>
-            <input type="text" name="subject" placeholder="Matematika, Fizika ..." value="{{ task.subject if task else '' }}" required>
-        </label>
-    </p>
-    <p>
-        <label>Tip:<br>
-            <select name="task_type" required>
-                {% for t in task_types %}
-                    <option value="{{ t }}" {% if task and task.task_type == t %}selected{% endif %}>{{ t }}</option>
-                {% endfor %}
-                {% if task and task.task_type and task.task_type not in task_types %}
-                    <option value="{{ task.task_type }}" selected>{{ task.task_type }}</option>
-                {% endif %}
-            </select>
-        </label>
-    </p>
-    <p>
-        <label>Prioriteta:<br>
-            <select name="priority" required>
-                <option value="obvezno" {% if not task or task.priority == 'obvezno' %}selected{% endif %}>Obvezno</option>
-                <option value="neobvezno" {% if task and task.priority == 'neobvezno' %}selected{% endif %}>Neobvezno</option>
-            </select>
-        </label>
-    </p>
-    <p>
-        <label>Rok:<br>
-            <input type="date" name="due_date" value="{{ task.due_date.strftime('%Y-%m-%d') if task else '' }}" required>
-        </label>
-    </p>
-    <p>
-        <label>Opis / link (npr. na ucilnice.arnes.si):<br>
-            <textarea name="description" rows="4">{{ task.description if task else '' }}</textarea>
-        </label>
-    </p>
-    <p>
-        <button type="submit">Shrani</button>
+<form method="post" class="row g-3">
+    <div class="col-12">
+        <label class="form-label">Naslov naloge</label>
+        <input type="text" name="title" class="form-control" value="{{ task.title if task else '' }}" required>
+    </div>
+    <div class="col-12 col-md-6">
+        <label class="form-label">Predmet</label>
+        <input type="text" name="subject" class="form-control" placeholder="Matematika, Fizika ..." value="{{ task.subject if task else '' }}" required>
+    </div>
+    <div class="col-12 col-md-6">
+        <label class="form-label">Tip</label>
+        <select name="task_type" class="form-select" required>
+            {% for t in task_types %}
+                <option value="{{ t }}" {% if task and task.task_type == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+            {% if task and task.task_type and task.task_type not in task_types %}
+                <option value="{{ task.task_type }}" selected>{{ task.task_type }}</option>
+            {% endif %}
+        </select>
+    </div>
+    <div class="col-12 col-md-6">
+        <label class="form-label">Rok</label>
+        <input type="date" name="due_date" class="form-control" value="{{ task.due_date.strftime('%Y-%m-%d') if task else '' }}" required>
+    </div>
+    <div class="col-12 col-md-6">
+        <label class="form-label">Prioriteta</label>
+        <select name="priority" class="form-select" required>
+            <option value="obvezno" {% if not task or task.priority == 'obvezno' %}selected{% endif %}>Obvezno</option>
+            <option value="neobvezno" {% if task and task.priority == 'neobvezno' %}selected{% endif %}>Neobvezno</option>
+        </select>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Opis / link (npr. na ucilnice.arnes.si)</label>
+        <textarea name="description" rows="4" class="form-control">{{ task.description if task else '' }}</textarea>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Shrani</button>
         {% if task %}
-            <a href="{{ url_for('index') }}" style="margin-left: 1rem;">Prekliči</a>
+            <a href="{{ url_for('index') }}" class="btn btn-link">Prekliči</a>
         {% endif %}
-    </p>
+    </div>
 </form>
 {% endblock %}
