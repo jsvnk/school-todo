@@ -15,7 +15,14 @@
     </p>
     <p>
         <label>Tip:<br>
-            <input type="text" name="task_type" placeholder="naloga, kolokvij, kviz ..." value="{{ task.task_type if task else '' }}" required>
+            <select name="task_type" required>
+                {% for t in task_types %}
+                    <option value="{{ t }}" {% if task and task.task_type == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+                {% if task and task.task_type and task.task_type not in task_types %}
+                    <option value="{{ task.task_type }}" selected>{{ task.task_type }}</option>
+                {% endif %}
+            </select>
         </label>
     </p>
     <p>

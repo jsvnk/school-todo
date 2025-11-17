@@ -30,6 +30,17 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 
+# Predefinirani tipi nalog
+TASK_TYPES = [
+    "Kviz iz vaj",
+    "Kviz iz teorije",
+    "Vaja",
+    "Kolokvij",
+    "Izpit",
+    "Test iz vaj",
+]
+
+
 # -------------------------------------------------
 # MODEL: naloga
 # -------------------------------------------------
@@ -135,7 +146,7 @@ def add_task():
         db.session.commit()
         return redirect(url_for("index"))
 
-    return render_template("add_task.html")
+    return render_template("add_task.html", task=None, task_types=TASK_TYPES)
 
 
 @app.route("/edit/<int:task_id>", methods=["GET", "POST"])
@@ -155,7 +166,7 @@ def edit_task(task_id):
         return redirect(url_for("index"))
 
     # za GET vrnemo formo z že izpolnjenimi podatki
-    return render_template("add_task.html", task=task)
+    return render_template("add_task.html", task=task, task_types=TASK_TYPES)
 
 
 @app.route("/delete/<int:task_id>", methods=["POST"])
