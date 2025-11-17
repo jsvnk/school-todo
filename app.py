@@ -91,13 +91,25 @@ def check_login():
 @app.route("/")
 def index():
     show_done = request.args.get("show_done", "0") == "1"
+    subject_filter = request.args.get("subject", "")
+
+    # seznam vseh predmetov za filter (distinct)
+    subjects = [s[0] for s in db.session.query(Task.subject).distinct().order_by(Task.subject).all()]
 
     query = Task.query.order_by(Task.due_date.asc())
+    if subject_filter:
+        query = query.filter(Task.subject == subject_filter)
     if not show_done:
         query = query.filter(Task.is_done.is_(False))
 
     tasks = query.all()
-    return render_template("index.html", tasks=tasks, show_done=show_done)
+    return render_template(
+        "index.html",
+        tasks=tasks,
+        show_done=show_done,
+        subjects=subjects,
+        subject_filter=subject_filter,
+    )
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -124,6 +136,34 @@ def add_task():
         return redirect(url_for("index"))
 
     return render_template("add_task.html")
+
+
+@app.route("/edit/<int:task_id>", methods=["GET", "POST"])
+def edit_task(task_id):
+    task = Task.query.get_or_404(task_id)
+
+    if request.method == "POST":
+        task.title = request.form["title"].strip()
+        task.task_type = request.form["task_type"].strip()
+        task.subject = request.form["subject"].strip()
+        due_date_str = request.form["due_date"]
+        task.description = request.form.get("description", "").strip()
+
+        task.due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+
+        db.session.commit()
+        return redirect(url_for("index"))
+
+    # za GET vrnemo formo z že izpolnjenimi podatki
+    return render_template("add_task.html", task=task)
+
+
+@app.route("/delete/<int:task_id>", methods=["POST"])
+def delete_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    return redirect(url_for("index"))
 
 
 @app.route("/done/<int:task_id>")

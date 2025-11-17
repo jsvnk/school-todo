@@ -2,13 +2,21 @@
 {% block content %}
 <h2>Seznam nalog</h2>
 
-<p>
-    {% if show_done %}
-        <a href="{{ url_for('index', show_done=0) }}">Skrij dokončane</a>
-    {% else %}
-        <a href="{{ url_for('index', show_done=1) }}">Pokaži tudi dokončane</a>
-    {% endif %}
-</p>
+<form method="get" style="margin-bottom: 1rem;">
+    <label>
+        Predmet:
+        <select name="subject" onchange="this.form.submit()">
+            <option value="">Vsi predmeti</option>
+            {% for subj in subjects %}
+                <option value="{{ subj }}" {% if subj == subject_filter %}selected{% endif %}>{{ subj }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label style="margin-left: 1rem;">
+        <input type="checkbox" name="show_done" value="1" {% if show_done %}checked{% endif %} onchange="this.form.submit()">
+        Pokaži dokončane
+    </label>
+</form>
 
 {% if not tasks %}
     <p>Trenutno ni nalog.</p>
@@ -37,6 +45,11 @@
                     {% else %}
                         <a href="{{ url_for('mark_done', task_id=task.id) }}">Označi kot opravljeno</a>
                     {% endif %}
+                    |
+                    <a href="{{ url_for('edit_task', task_id=task.id) }}">Uredi</a>
+                    <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" style="display:inline;" onsubmit="return confirm('Res želiš izbrisati to nalogo?');">
+                        <button type="submit" style="background:none;border:none;color:#c00;cursor:pointer;padding:0;">Izbriši</button>
+                    </form>
                 </div>
             </div>
             {% if task.description %}
