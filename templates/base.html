@@ -25,14 +25,13 @@
 <header>
     <div><strong>Šolske naloge</strong></div>
     <nav>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('index') }}">Moje naloge</a>
+        {% if session.get('logged_in') %}
+            <a href="{{ url_for('index') }}">Naloge</a>
             <a href="{{ url_for('add_task') }}">Dodaj nalogo</a>
-            <span>| Prijavljen kot {{ current_user.username }}</span>
+            <span>| Prijavljen kot {{ session.get('username') }}</span>
             <a href="{{ url_for('logout') }}">Odjava</a>
         {% else %}
             <a href="{{ url_for('login') }}">Prijava</a>
-            <a href="{{ url_for('register') }}">Registracija</a>
         {% endif %}
     </nav>
 </header>
