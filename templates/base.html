@@ -17,14 +17,23 @@
         .badge.subject { background: #e5ffd0; }
         .date { font-weight: bold; }
         nav a { margin-right: 1rem; }
+        .right { text-align: right; }
+        .error { color: #c00; }
     </style>
 </head>
 <body>
 <header>
     <div><strong>Šolske naloge</strong></div>
     <nav>
-        <a href="{{ url_for('index') }}">Vse naloge</a>
-        <a href="{{ url_for('add_task') }}">Dodaj nalogo</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('index') }}">Moje naloge</a>
+            <a href="{{ url_for('add_task') }}">Dodaj nalogo</a>
+            <span>| Prijavljen kot {{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}">Odjava</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Prijava</a>
+            <a href="{{ url_for('register') }}">Registracija</a>
+        {% endif %}
     </nav>
 </header>
 
